@@ -7,6 +7,6 @@
 * JavaScript
 * Web API
 
-[Link do projektu]()
+[Link do projektu](https://honx1337.github.io/)
 
 Zdjęcia pobrane z [Cyberpunk Wiki](https://cyberpunk.fandom.com/wiki/Cyberpunk_Wiki), własność CD PROJEKT RED oraz R.TALLSORIAN GAMES

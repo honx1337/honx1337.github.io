@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netwatch - Blackwall Interface</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Cyberpunk Blackwall Visual Effects */
+        .blackwall-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        /* Screen Edges Red Artifacts / Vignette */
+        .edge-artifacts {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-shadow: inset 0 0 80px rgba(255, 0, 55, 0.45), inset 0 0 150px rgba(255, 0, 0, 0.3);
+            animation: glitch-pulse 0.7s infinite alternate ease-in-out;
+        }
+
+        @keyframes glitch-pulse {
+            0% { opacity: 0.6; box-shadow: inset 0 0 60px rgba(255, 0, 55, 0.4); }
+            50% { opacity: 0.9; box-shadow: inset 0 0 110px rgba(255, 20, 60, 0.6); }
+            100% { opacity: 0.5; box-shadow: inset 0 0 70px rgba(255, 0, 0, 0.35); }
+        }
+
+        /* Container for Random Vertical Red Glitch Stripes */
+        .stripes-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .vertical-stripe {
+            position: absolute;
+            width: 3px;
+            background: linear-gradient(180deg, transparent, rgba(255, 30, 60, 0.85), transparent);
+            box-shadow: 0 0 12px #ff0037, 0 0 20px #ff0037;
+            animation: flickerStripe 0.06s infinite alternate;
+        }
+
+        @keyframes flickerStripe {
+            0% { opacity: 0.2; transform: scaleY(0.95); }
+            100% { opacity: 1; transform: scaleY(1.05); }
+        }
+
+        /* Central Login Box & Dashboard */
+        main {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .login-card {
+            background-color: rgba(10, 0, 5, 0.85);
+            border: 2px solid #ff0037;
+            box-shadow: 0 0 25px rgba(255, 0, 55, 0.5), inset 0 0 15px rgba(255, 0, 55, 0.2);
+            padding: 35px 40px;
+            width: 100%;
+            max-width: 520px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .login-card h2 {
+            color: #ff0037;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            border-bottom: 2px solid #ff0037;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            text-shadow: 0 0 8px rgba(255, 0, 55, 0.7);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            color: var(--text-color);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        .input-group input[type="text"],
+        .input-group input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #ff0037;
+            color: #55ead4;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--heading-color);
+            box-shadow: 0 0 10px rgba(243, 230, 0, 0.5);
+        }
+
+        .btn-cyber {
+            width: 100%;
+            padding: 12px;
+            background-color: rgba(255, 0, 55, 0.2);
+            border: 2px solid #ff0037;
+            color: #ff0037;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-cyber:hover {
+            background-color: #ff0037;
+            color: #000;
+            box-shadow: 0 0 15px #ff0037;
+        }
+
+        .error-msg {
+            color: #ff0037;
+            font-size: 0.85rem;
+            margin-top: 15px;
+            display: none;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* 8 Input Sequence Inputs Grid */
+        .sequence-section {
+            display: none;
+        }
+
+        .sequence-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 25px 0;
+        }
+
+        .seq-input {
+            width: 100%;
+            padding: 10px 5px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid var(--border-color);
+            color: var(--heading-color);
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+            font-weight: bold;
+            outline: none;
+        }
+
+        .seq-input.valid {
+            border-color: #00ff66;
+            box-shadow: 0 0 8px #00ff66;
+            color: #00ff66;
+        }
+
+        .success-banner {
+            display: none;
+            color: #00ff66;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 20px;
+            padding: 12px;
+            border: 1px solid #00ff66;
+            background: rgba(0, 255, 102, 0.1);
+            text-shadow: 0 0 8px rgba(0, 255, 102, 0.6);
+        }
+
+        header, footer {
+            position: relative;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand-container">
+            <img src="NetWatch_Logo_CP2077.webp" alt="Netwatch - Vos Videmus">
+            <div class="brand-text">
+                <h1>Netwatch</h1>
+                <p>Vos Videmus</p>
+                <div id="clock">00:00:00.000</div>
+            </div>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">O Netwatch</a></li>
+                <li><a href="agenci.html">Słynni Agenci</a></li>
+                <li><a href="historia.html">O DATAKRASH</a></li>
+                <li><a href="oferta.html">Szukasz pracy?</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Blackwall Visual Effect Canvas Overlay -->
+        <div class="blackwall-overlay">
+            <div class="edge-artifacts"></div>
+            <div class="stripes-container" id="stripes-container"></div>
+        </div>
+
+        <!-- Single Box for Login & Code Verification -->
+        <div class="login-card">
+            <!-- STEP 1: LOGIN PANEL -->
+            <div id="login-form-wrapper">
+                
+                <form id="login-form">
+                    <div class="input-group">
+                        
+                        <input type="text" id="username" autocomplete="off" placeholder="" required>
+                    </div>
+                    <div class="input-group">
+                        
+                        <input type="password" id="password" placeholder="" required>
+                    </div>
+                    <button type="submit" class="btn-cyber">Autoryzuj Dostęp</button>
+                    <div id="login-error" class="error-msg">ODMOWA DOSTĘPU: BŁĘDNY LOGIN LUB HASŁO</div>
+                </form>
+            </div>
+
+            <!-- STEP 2: 8 INPUT CODE VERIFICATION -->
+            <div id="sequence-wrapper" class="sequence-section">
+                <h2>Autoryzacja Sekwencji</h2>
+                <p style="font-size: 0.85rem; color: var(--text-color); margin-bottom: 15px;">Wprowadź 8 kodów dostępu w dowolnej kolejności:</p>
+                
+                <div class="sequence-grid">
+                    <input type="text" class="seq-input" maxlength="5" placeholder="00000">
+                    <input type="text" class="seq-input" maxlength="5" placeholder="00000">
+                    <input type="text" class="seq-input" maxlength="5" placeholder="00000">
+                    <input type="text" class="seq-input" maxlength="5" placeholder="00000">
+                    <input type="text" class="seq-input" maxlength="5" placeholder="00000">
+                    <input type="text" class="seq-input" maxlength="5" placeholder="00000">
+                    <input type="text" class="seq-input" maxlength="5" placeholder="00000">
+                    <input type="text" class="seq-input" maxlength="5" placeholder="00000">
+                </div>
+
+                <button id="verify-seq-btn" class="btn-cyber">Weryfikuj Kod</button>
+                <div id="seq-error" class="error-msg">NIEPOPRAWNE KODY SEKWENCJI!</div>
+                <div id="seq-success" class="success-banner">PRZEŁAMANIE BLACKWALLA ZAKOŃCZONE SUKCESEM</div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2077 Netwatch. <span id="vos-videmus-btn" style="cursor: pointer;">Vos Videmus</span>.</p>
+    </footer>
+
+    <script src="script.js"></script>
+<script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // --- 1. Generowanie losowych pionowych jasnoczerwonych pasków (Blackwall Effect) ---
+            const stripesContainer = document.getElementById("stripes-container");
+            const blackwallOverlay = document.querySelector(".blackwall-overlay");
+
+            function generateStripes() {
+                if (!stripesContainer) return;
+                stripesContainer.innerHTML = "";
+                // Losowa ilość pasków od 18 do 99
+                const stripeCount = Math.floor(Math.random() * (99 - 18 + 1)) + 18;
+
+                for (let i = 0; i < stripeCount; i++) {
+                    const stripe = document.createElement("div");
+                    stripe.classList.add("vertical-stripe");
+                    
+                    // Wysokość od 10% do 90% wysokości ekranu
+                    const heightPercent = Math.floor(Math.random() * (90 - 10 + 1)) + 10;
+                    const topPercent = Math.floor(Math.random() * (100 - heightPercent));
+                    const leftPercent = Math.random() * 98;
+
+                    stripe.style.height = heightPercent + "vh";
+                    stripe.style.top = topPercent + "vh";
+                    stripe.style.left = leftPercent + "%";
+                    stripe.style.animationDelay = (Math.random() * 0.5) + "s";
+                    stripe.style.animationDuration = (0.03 + Math.random() * 0.08) + "s";
+
+                    stripesContainer.appendChild(stripe);
+                }
+            }
+
+            generateStripes();
+            const stripeInterval = setInterval(generateStripes, 50);
+
+            // --- 2. Obsługa Panelu Logowania ---
+            const loginForm = document.getElementById("login-form");
+            const loginWrapper = document.getElementById("login-form-wrapper");
+            const sequenceWrapper = document.getElementById("sequence-wrapper");
+            const loginError = document.getElementById("login-error");
+
+            const validLogin = "Alt";
+            const validPasswords = ["ff06b5", "ff:06:b5", "FF06B5", "FF:06:B5"];
+
+            loginForm.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const userVal = document.getElementById("username").value.trim();
+                const passVal = document.getElementById("password").value.trim();
+
+                if (userVal === validLogin && validPasswords.includes(passVal)) {
+                    loginError.style.display = "none";
+                    loginWrapper.style.display = "none";
+                    sequenceWrapper.style.display = "block";
+                } else {
+                    loginError.style.display = "block";
+                }
+            });
+
+            // --- 3. Obsługa 8 Textboxów Sekwencji Kodów ---
+            const targetCodes = ["00255", "00006", "00181", "00051", "00091", "00240", "00270", "00420"];
+            const seqInputs = Array.from(document.querySelectorAll(".seq-input"));
+            const verifyBtn = document.getElementById("verify-seq-btn");
+            const seqError = document.getElementById("seq-error");
+            const loginCard = document.querySelector(".login-card");
+
+            verifyBtn.addEventListener("click", () => {
+                const userCodes = seqInputs.map(input => input.value.trim());
+                
+                const sortedUserCodes = [...userCodes].sort();
+                const sortedTargetCodes = [...targetCodes].sort();
+
+                const isValid = JSON.stringify(sortedUserCodes) === JSON.stringify(sortedTargetCodes);
+
+                if (isValid) {
+                    // Zatrzymujemy i usuwamy efekt Blackwalla
+                    clearInterval(stripeInterval);
+                    if (blackwallOverlay) {
+                        blackwallOverlay.style.display = "none";
+                    }
+
+                    // Podmieniamy zawartość karty logowania na wideo i komunikat
+                    loginCard.style.maxWidth = "700px";
+                    loginCard.innerHTML = `
+                        <h2 style="color: #00ff66; border-color: #00ff66; text-shadow: 0 0 10px rgba(0,255,102,0.6);">BLACKWALL REACHED</h2>
+                        <div style="position: relative; width: 100%; padding-bottom: 56.25%; margin-bottom: 20px;">
+                            <iframe src="https://www.youtube.com/embed/7MR49w84OHY?autoplay=1" 
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 2px solid #55ead4;" 
+                                frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+                            </iframe>
+                        </div>
+                        <p style="font-family: 'JetBrains Mono', monospace; color: #55ead4; font-size: 0.95rem; line-height: 1.5; text-shadow: 0 0 5px rgba(85,234,212,0.5);">
+                            Gratuluję. Teraz skontaktuj się z administratorem i podaj mu hasło Magenta, a dostaniesz nagrodę.
+                        </p>
+                    `;
+                } else {
+                    seqSuccess.style.display = "none";
+                    seqError.style.display = "block";
+                }
+            });
+        });
+    </script>
+</body>
+</html>
