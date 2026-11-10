@@ -231,7 +231,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Jeśli stan został już wcześniej aktywowany (np. użytkownik kliknął i przeszedł na inną podstronę)
-    if (localStorage.getItem(BRYCE_CLICKED_KEY) === "true") {
+    // Sprawdzamy, czy aktualnie znajdujemy się na stronie agenci.html
+    const isAgenciPage = window.location.pathname.endsWith("agenci.html") || window.location.pathname.includes("agenci");
+
+    // Jeśli stan został aktywowany ORAZ jesteśmy na stronie z agentami, uruchom cykl stopki
+    if (localStorage.getItem(BRYCE_CLICKED_KEY) === "true" && isAgenciPage) {
         startFooterCycle();
     }
 
